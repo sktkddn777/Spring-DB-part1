@@ -1,11 +1,12 @@
 package hello.jdbc.exception.basic;
 
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.net.ConnectException;
 import java.sql.SQLException;
 
+@Slf4j
 public class UnCheckedAtTest {
 
     @Test
@@ -13,6 +14,17 @@ public class UnCheckedAtTest {
         Controller controller = new Controller();
         Assertions.assertThatThrownBy(() -> controller.request())
                 .isInstanceOf(Throwable.class);
+    }
+
+    @Test
+    void printEx() {
+        Controller controller = new Controller();
+        try {
+            controller.request();
+        } catch (Exception e) {
+//            e.printStackTrace(); - 런타임 발생한 부분부터 클래스와 메소드 정보를 순차적으로 보여줘서 구조가 유출될 수 있음 (쓰지말라)
+            log.info("ex = {}", e);
+        }
     }
 
     static class Controller {
@@ -28,8 +40,8 @@ public class UnCheckedAtTest {
         Repository repository = new Repository();
 
         public void logic() {
-            networkClient.call();
             repository.call();
+            networkClient.call();
         }
     }
 
@@ -62,8 +74,12 @@ public class UnCheckedAtTest {
     }
 
     static class RuntimeSQLException extends RuntimeException {
+
+        public RuntimeSQLException() {
+
+        }
         public RuntimeSQLException(Throwable cause) {
-            super(cause);
+            super(cause); // cause 로 넘겨주면서 기존 예외를 같이 넘겨준다
         }
     }
 }
